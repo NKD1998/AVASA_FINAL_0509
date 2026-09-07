@@ -564,8 +564,20 @@ section[data-screen-label="01 Home"]{padding-left:0 !important;padding-right:0 !
           </div>
         </div>
         <div style="margin-top:30px">
+          <label style="display:block;font:400 10px Jost,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45)">Preferred day to visit</label>
+          <input type="date" value="{{ form.date }}" onInput="{{ setDate }}" min="{{ minDate }}" style="width:100%;box-sizing:border-box;margin-top:9px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.24);color:#fff;font:300 16px Jost,sans-serif;padding:10px 0;outline:none;color-scheme:dark;min-height:44px;cursor:pointer">
+        </div>
+        <div style="margin-top:26px">
+          <label style="display:block;font:400 10px Jost,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45)">Preferred time</label>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px">
+            <sc-for list="{{ slots }}" as="s" hint-placeholder-count="3">
+              <button onClick="{{ s.pick }}" style="border:1px solid rgba(255,255,255,.22);background:transparent;font:400 10.5px Jost,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:13px 4px;min-height:44px;cursor:pointer;white-space:nowrap;transition:all .35s;color: {{ s.color }};border-color: {{ s.border }};background: {{ s.bg }}">{{ s.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="margin-top:26px">
           <label style="display:block;font:400 10px Jost,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45)">Message</label>
-          <textarea rows="3" value="{{ form.msg }}" onInput="{{ setMsg }}" placeholder="Preferred day to visit" style="width:100%;box-sizing:border-box;margin-top:9px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.24);color:#fff;font:300 15px/1.6 Jost,sans-serif;padding:10px 0;outline:none;resize:none"></textarea>
+          <textarea rows="2" value="{{ form.msg }}" onInput="{{ setMsg }}" placeholder="Anything else we should know" style="width:100%;box-sizing:border-box;margin-top:9px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.24);color:#fff;font:300 15px/1.6 Jost,sans-serif;padding:10px 0;outline:none;resize:none"></textarea>
         </div>
 
         <button onClick="{{ submit }}" style="width:100%;margin-top:34px;border:1px solid #C08A6E;background:#C08A6E;color:#fff;font:400 11px Jost,sans-serif;letter-spacing:.2em;text-transform:uppercase;padding:17px;cursor:pointer;transition:all .45s cubic-bezier(.22,1,.36,1)" style-hover="background:#A87257;border-color:#A87257">Request a visit</button>
@@ -811,7 +823,7 @@ class Component extends DCLogic {
       planTail: String((this.plans[this.state.plan] || this.plans[0]).area).slice(1),
       notSent: !this.state.sent,
       sent: this.state.sent,
-      form: { name: this.state.name, phone: this.state.phone, email: this.state.email, msg: this.state.msg },
+      form: { name: this.state.name, phone: this.state.phone, email: this.state.email, msg: this.state.msg, date: this.state.date || '' },
       setName: (e) => this.setState({ name: e.target.value }),
       setPhone: (e) => this.setState({ phone: e.target.value }),
       setEmail: (e) => this.setState({ email: e.target.value }),
@@ -820,8 +832,17 @@ class Component extends DCLogic {
       roofPrev: () => this.slide('roof', -1),
       roofNext: () => this.slide('roof', 1),
       setMsg: (e) => this.setState({ msg: e.target.value }),
+      setDate: (e) => this.setState({ date: e.target.value }),
+      minDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
+      slots: ['9AM – 1PM', '1PM – 5PM', '5PM – 9PM'].map(l => ({
+        label: l,
+        pick: () => this.setState({ slot: l }),
+        color: this.state.slot === l ? '#fff' : 'rgba(255,255,255,.6)',
+        border: this.state.slot === l ? '#C08A6E' : 'rgba(255,255,255,.22)',
+        bg: this.state.slot === l ? '#C08A6E' : 'transparent'
+      })),
       submit: () => this.setState({ sent: true }),
-      reset: () => this.setState({ sent: false, name: '', phone: '', email: '', msg: '' }),
+      reset: () => this.setState({ sent: false, name: '', phone: '', email: '', msg: '', date: '', slot: '' }),
       cfgs: this.cfgList.map(l => ({
         label: l,
         pick: () => this.setState({ cfg: l }),
